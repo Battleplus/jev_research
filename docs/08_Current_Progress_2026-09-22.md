@@ -532,26 +532,52 @@ Jev 应当只是 evaluator backend，不应成为算法不可替代部分。
 
 ---
 
-## 11. 最新 Undermind 检索状态
+## 11. 最新 Undermind 检索结果
 
-已完成的深度检索：
+最新 Deep Search：
 
-1. **Calibrated decision feedback for reinforcement learning**
-2. **Human preference RL to calibrated AI feedback**
-3. **Training only AI preference teacher then standalone RL policy**
+**Sample wise human calibrated AI preference reliability in PBRL**
 
-当前新检索：
+已完成，共返回 **70 篇高相关工作**。
 
-4. **Human calibrated AI preference RL novelty and implementation difficulty**
+最终检索结论：
 
-本轮检索还发现以下非常接近的 2026 新工作，需要下一轮优先全文核验：
+> **No paper in the searched set appears to implement the full method.**
 
-- Preference-Calibrated Human-in-the-Loop Reinforcement Learning for Robotic Manipulation
-- TrustRoboReward: Preference-Ordered Isotonic Score Editing for Multi-Paradigm Robot Reward Models
-- Finding the Signal in the Spam: Jointly Learning Rewards and Worker Reliability from Pairwise Comparisons
-- Trust, Don't Trust, or Flip: Robust Preference-Based Reinforcement Learning with Multi-Expert Feedback
+即目前未发现一篇论文完整实现：
 
-当前 Undermind 高成本调用额度暂时耗尽，工具返回短周期 reset 倒计时。待额度恢复后，下一步优先逐篇读取上述四篇全文，重新确认 novelty 边界。
+\[
+small\ Human\ Preference
+\rightarrow
+P(AI=Human\mid sample,context,policy\ stage)
+\rightarrow
+preference\ weighting/escalation
+\rightarrow
+Reward\ Model
+\rightarrow
+PbRL/Robot\ RL
+\rightarrow
+standalone\ policy
+\]
+
+但以下各单模块都已有先例：
+
+- Human-calibrated AI judge
+- sample-wise reliability
+- instance-dependent preference noise
+- confidence weighting
+- Human / AI routing
+- multi-expert trust
+- AI preference → RL
+- policy-distribution correction
+
+因此 novelty 必须落在：
+
+> **Human-Anchored + AI-Specific + Contextual + Sample-wise + Policy-Aware + downstream Preference RL 的 end-to-end coupling。**
+
+详细结果见：
+
+[11_Final_Deep_Search_Result.md](11_Final_Deep_Search_Result.md)
 
 ---
 
@@ -567,6 +593,6 @@ Jev 应当只是 evaluator backend，不应成为算法不可替代部分。
 
 而是：
 
-> **Human-Calibrated AI Preference Reinforcement Learning**
+> **Human-Anchored Contextual Reliability for AI-Assisted Preference-Based Reinforcement Learning**
 
 Jev 是其中一个非常适合测试的 fast probabilistic evaluator，而不是论文贡献本身。
