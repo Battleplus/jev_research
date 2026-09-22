@@ -1,0 +1,262 @@
+# 02. 给学长的方向评估报告
+
+## 一、想法来源与核心问题
+
+最近关注到 TypeSafe 新发布的 Jev。Jev 主要面向结构化决策，可以针对给定状态输出 Choice、Score、概率/置信度等结果。
+
+最开始的想法是：
+
+> 能否把 Jev 作为强化学习训练过程中的辅助评价模块，让它对 agent / 机器人产生的状态、动作或轨迹进行评价，再把评价结果作为额外 reward、preference 或 safety signal，辅助 PPO、SAC 等算法训练？
+
+最基础形式：
+
+\[
+r_t = r_t^{env} + \lambda r_t^{Jev}
+\]
+
+进一步调研之后发现：
+
+> **单纯“Jev → reward → PPO/SAC”这个想法本身已经不够新。**
+
+真正可能形成研究价值的问题应该变成：
+
+> **当外部语义评价器并不完全可靠时，RL 应该什么时候相信它、相信多少，以及什么时候不应该使用它？**
+
+因此目前更倾向于把课题抽象成：
+
+## Calibrated Semantic Feedback Reinforcement Learning
+
+即：
+
+> 将 Jev 或其他语义评价模型看作一个“带噪外部反馈源”，利用经过 calibration 的置信度动态决定其对 RL 更新的影响。
+
+Jev 是重要 evaluator，但方法不绑定 Jev。
+
+## 二、目前相关方向做到什么程度
+
+目前比较接近的路线包括：
+
+| 工作方向 | 已有做法 | 对本课题的影响 |
+|---|---|---|
+| RL-VLM-F | VLM 产生 preference → reward model → SAC | AI feedback → robot RL 已成立 |
+| RLAIF | AI feedback 替代 human feedback | “AI 当老师”本身不新 |
+| Noisy LLM feedback | 多次查询、一致性过滤、potential-like reward | 已处理 evaluator 不可靠问题 |
+| Uncertainty-aware LLM guidance | uncertainty 动态混合 LLM policy 与 PPO policy | confidence-aware RL 已有先例 |
+| RARM | confidence threshold 门控 robot progress reward | hard gate 已有人做 |
+| VLM-AR3L | absolute + relative reward + confidence check | reward reliability 已进入 robot RL |
+| Large Reward Models | VLM online reward → PPO | online foundation-model reward 已出现 |
+| UARM | reward uncertainty → advantage reweighting | uncertainty 进入 update 已有工作 |
+| Strong Judge Routing | RM 不确定时调用 stronger judge | uncertainty routing 已有先例 |
+
+因此：
+
+> **“LLM/VLM/Judge 给 RL reward”已经不是空白。**
+
+## 三、目前认为还有价值的创新点
+
+### Calibrated Trust Allocation
+
+让 evaluator 输出：
+
+\[
+E(\tau_t)\rightarrow(q_t,c_t)
+\]
+
+其中：
+
+- \(q_t\)：semantic progress / preference / safety；
+- \(c_t\)：confidence / reliability。
+
+不是固定：
+
+\[
+r_t = r_t^{env} + \lambda q_t
+\]
+
+而是：
+
+\[
+r_t
+=
+r_t^{env}
++
+\lambda w_t q_t
+\]
+
+其中：
+
+\[
+w_t
+=
+f(c_t,\mathrm{OOD}_t,\mathrm{disagreement}_t)
+\]
+
+进一步可直接进入 PPO advantage：
+
+\[
+\tilde A_t
+=
+A_t^{env}
++
+\lambda w_tA_t^{semantic}
+\]
+
+希望研究：
+
+> calibration 是否真的能够改善最终 RL policy，而不只是提升 evaluator accuracy。
+
+## 四、Jev 的角色
+
+\`\`\`text
+Environment
+     │
+     ↓
+Policy → trajectory
+             │
+             ↓
+      Semantic Evaluator
+       Jev / LLM / RM
+             │
+       ┌─────┴─────┐
+       ↓           ↓
+ semantic score  confidence
+       │           │
+       └─────┬─────┘
+             ↓
+      Trust Allocation
+             │
+    ┌────────┼─────────┐
+    ↓        ↓         ↓
+  使用    降低权重   不采用/升级
+                     Strong Judge
+             │
+             ↓
+          PPO / SAC
+             │
+             ↓
+           Policy
+\`\`\`
+
+Jev 更适合做：
+
+> fast semantic teacher / evaluator
+
+而不是 RL policy 本身。
+
+## 五、Jev 不开源的问题
+
+Jev 是闭源 API，因此不能下载权重进行 end-to-end fine-tuning。
+
+但本课题并不需要训练 Jev。
+
+建议方案：
+
+### Jev 做 teacher，本地 evaluator 做 student
+
+先让 Jev 对部分 trajectory 评价：
+
+\[
+D_J=
+\{(\tau_i,q_i,c_i)\}_{i=1}^{N}
+\]
+
+可选训练本地 evaluator：
+
+\[
+f_\phi(\tau)
+\rightarrow
+(\hat q,\hat c)
+\]
+
+高频 RL inner-loop 使用本地 evaluator，只在 calibration、OOD、low-confidence、key transition 情况下调用 Jev / strong judge。
+
+需要提前确认 TypeSafe 服务条款是否允许使用 API 输出训练 surrogate model。
+
+## 六、主要实验问题
+
+最终必须证明的不是：
+
+> Jev 打分准不准。
+
+而是：
+
+\[
+\text{better calibrated feedback}
+\Rightarrow
+\text{better learned policy}
+\]
+
+至少比较：
+
+1. PPO/SAC baseline
+2. handcrafted dense reward
+3. raw semantic evaluator reward
+4. fixed-weight semantic reward
+5. hard confidence gate
+6. calibrated continuous weighting
+7. calibrated weighting + escalation
+8. alternative LLM/VLM/local evaluator
+
+指标包括：
+
+- Success Rate
+- True Return
+- Sample Efficiency
+- ECE
+- Brier Score
+- NLL
+- OOD Performance
+- Reward Hacking
+- API Calls / Cost / Latency
+
+## 七、第一阶段建议
+
+先不碰 RGB / VLM perception。
+
+直接用 MetaWorld simulator privileged state：
+
+- gripper position
+- object position
+- goal position
+- is_grasped
+- distance-to-goal
+- collision
+
+转换成 structured description 再交给 evaluator。
+
+第一阶段只回答：
+
+> **Jev semantic feedback 到底有没有对 RL 提供有效 learning signal？**
+
+如果没有，及时止损。
+
+如果有效，再继续：
+
+\[
+Jev\ confidence
+\rightarrow
+calibration
+\rightarrow
+trust weighting
+\]
+
+然后再进入 ManiSkill / LIBERO / 真机。
+
+## 八、难度判断
+
+- 简单 Jev + PPO：约 5/10
+- calibration + uncertainty + OOD + reward hacking：约 7.5–8/10
+- 多机器人任务 + 真机 + 理论：约 9/10
+
+## 九、希望学长重点帮忙判断
+
+1. calibrated semantic feedback + RL 的创新量是否够？
+2. 更适合做 general RL、robot RL 还是 Safe RL？
+3. 应该把主线放在 reward weighting，还是 reliability-aware advantage？
+4. Jev 闭源是否会导致复现风险过大？
+5. 是否应该一开始就加入 open/local evaluator？
+6. 这个方向是否值得投入 2–3 个月做完整验证？
+
+目前个人更倾向于：
+
+> **Calibrated Semantic Feedback Reinforcement Learning：将 Jev 等外部 evaluator 的输出视为带噪反馈，通过 calibration 与 uncertainty-aware trust allocation 动态控制其对 PPO/SAC policy update 的影响，并重点研究 OOD、reward hacking 与机器人任务下的鲁棒性。**
