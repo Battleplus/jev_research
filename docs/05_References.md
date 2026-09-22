@@ -56,3 +56,25 @@
 
 19. **Enhancing Rating-Based Reinforcement Learning to Effectively Leverage Feedback from Large Vision-Language Models** — Luu et al., ICML 2025  
     https://doi.org/10.48550/arXiv.2506.12822
+
+
+## 与 Human Preference / AI Preference 桥接最相关的补充文献
+
+20. **Hybrid Preferences: Learning to Route Instances for Human vs. AI Feedback** — Miranda et al., 2024  
+    https://arxiv.org/abs/2410.19133
+
+21. **RIME: Robust Preference-based Reinforcement Learning with Noisy Preferences** — Cheng et al., ICML 2024  
+    https://proceedings.mlr.press/
+
+22. **Reward Uncertainty for Exploration in Preference-based Reinforcement Learning** — Liang et al., ICLR 2022  
+    https://doi.org/10.48550/arXiv.2205.12401
+
+23. **Direct Language Model Alignment from Online AI Feedback** — Guo et al., 2024  
+    https://arxiv.org/
+
+24. **Regret Bounds for Reinforcement Learning from Multi-Source Imperfect Preferences** — Shi et al., 2026  
+    https://arxiv.org/abs/2603.20453
+
+25. **Human–AI preference routing / hybrid annotation** should be treated as a direct comparison class when evaluating Jev-based selective escalation.
+
+> 注：20–24 的作用不是单纯扩充 related work，而是明确 novelty 边界：human→AI label replacement、noisy preference robustness、reward uncertainty、online AI feedback、multi-source imperfect preference 都已有先例。新工作需要进一步研究 human-anchored calibration 与 policy-level trust allocation。
