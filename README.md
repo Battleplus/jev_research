@@ -44,6 +44,12 @@ w_t = f(c_t, \mathrm{OOD}_t, \mathrm{disagreement}_t)
 
 Jev 在这里作为一个 fast semantic evaluator / teacher，而不是论文方法本身。
 
+如果把课题进一步收缩到 preference learning，当前更清晰的定位是：
+
+> **Human-Anchored Calibrated AI Feedback for Preference-Based Reinforcement Learning**
+>
+> 用少量 human preference 作为目标锚点，对 Jev 等 AI evaluator 的 preference/confidence 做 calibration，再根据 sample-wise reliability 决定 AI feedback 对 reward learning 和 policy update 的影响。
+
 ## 当前结论
 
 1. **AI / LLM / VLM feedback → RL 已经有大量先例**，因此不能把“使用 Jev 给 reward”作为主要 novelty。
@@ -67,6 +73,9 @@ Jev 在这里作为一个 fast semantic evaluator / teacher，而不是论文方
 - [docs/03_Method_v1.md](docs/03_Method_v1.md)：当前方法设计与 Jev 闭源调用方案
 - [docs/04_Experiment_Plan.md](docs/04_Experiment_Plan.md)：实验路线和止损计划
 - [docs/05_References.md](docs/05_References.md)：核心参考文献
+- [docs/06_Reading_Plan.md](docs/06_Reading_Plan.md)：文献精读顺序
+- [docs/07_Human_Preference_RL_Lineage.md](docs/07_Human_Preference_RL_Lineage.md)：与人类偏好强化学习 / RLHF 的关系与最终定位
+- [experiments/00_POC_Plan.md](experiments/00_POC_Plan.md)：两周 proof-of-concept 计划
 
 ## 当前建议的目标
 
