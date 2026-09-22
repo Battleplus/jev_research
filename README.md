@@ -66,7 +66,9 @@ w_t = f(c_t, \mathrm{OOD}_t, \mathrm{disagreement}_t)
 4. **训练期 AI teacher、部署期 standalone policy 已经有大量先例**，包括 RL-VLM-F、LAPP、Preference VLM 等，因此这不能作为 novelty。
 5. **Hybrid Human+AI preference、uncertain sample→Human、confidence weighting 也已有近邻工作**，包括 Preference VLM、ROVED、Hybrid Preferences、CW-PO、BACON、Conformal Feedback Alignment 等。
 6. 当前最值得争取的 novelty 是：**Human-Aligned sample-wise reliability**，而不是 raw AI confidence。
-7. Jev 是闭源模型，不需要训练 Jev 本身，也不应成为算法不可替代组件；部署阶段最终 policy 应独立运行，不再调用 Jev。
+7. 最新 Undermind Deep Search 共检索 70 篇高相关工作，**未发现完整实现“small Human anchor → context/sample-wise AI–Human agreement calibration → preference weighting/escalation → downstream PbRL/robot RL → standalone policy”整条链路的论文**。当前 novelty 必须限定在这一 end-to-end coupling，而不是任一单模块。
+8. 当前建议进一步加入 **policy-induced AI feedback reliability shift**：同一个 evaluator 的 Human agreement 可能随着 policy distribution 改变而漂移。
+9. Jev 是闭源模型，不需要训练 Jev 本身，也不应成为算法不可替代组件；部署阶段最终 policy 应独立运行，不再调用 Jev。
 
 ## 仓库结构
 
@@ -80,6 +82,7 @@ w_t = f(c_t, \mathrm{OOD}_t, \mathrm{disagreement}_t)
 - [docs/08_Current_Progress_2026-09-22.md](docs/08_Current_Progress_2026-09-22.md)：当前进度、novelty 边界、难度与风险
 - [docs/09_Closest_Prior_Work_Map.md](docs/09_Closest_Prior_Work_Map.md)：最接近 prior work 与模块级撞题地图
 - [docs/10_2026_Closest_Work_Verification.md](docs/10_2026_Closest_Work_Verification.md)：配额恢复后对 2026 最危险近邻工作的全文核验
+- [docs/11_Final_Deep_Search_Result.md](docs/11_Final_Deep_Search_Result.md)：70 篇 Deep Search 最终结论、novelty 边界与当前定稿研究问题
 - [experiments/00_POC_Plan.md](experiments/00_POC_Plan.md)：第一版两周 proof-of-concept 计划
 - [experiments/01_Human_Calibrated_Jev_POC_v2.md](experiments/01_Human_Calibrated_Jev_POC_v2.md)：当前推荐的 Human-Calibrated Jev PoC v2
 
@@ -89,7 +92,9 @@ w_t = f(c_t, \mathrm{OOD}_t, \mathrm{disagreement}_t)
 
 1. Jev raw confidence 是否能够预测 Jev–Human preference agreement？
 2. 少量 Human Preference 能否把 Jev confidence 校准成更可靠的 Human-Aligned Reliability？
-3. 更好的 reliability estimation 是否最终改善 Reward Model 和 RL policy，而不只是改善 ECE/Brier？
+3. Jev–Human agreement 是否随 trajectory difficulty / OOD / **policy stage** 系统变化？
+4. Static calibration 是否会随着 policy distribution shift 失效，而 online recalibration 能否维持 reliability？
+5. 更好的 reliability estimation 是否最终改善 Reward Model 和 RL policy，而不只是改善 ECE/Brier？
 
 如果这三条成立，再进入 selective escalation、distribution shift、OOD、reward hacking、ManiSkill/LIBERO 和真机。
 
