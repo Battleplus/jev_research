@@ -38,6 +38,72 @@ c_t
 P(E(\tau_t)\text{ is correct}\mid\tau_t)
 \]
 
+
+## 1.1 Human Preference Anchor
+
+如果论文主线要明确落在 Preference RL / RLHF 上，建议不要把 human feedback 完全拿掉。
+
+定义少量 human preference：
+
+\[
+D_H
+=
+\{
+(\sigma_i^A,\sigma_i^B,y_i^H)
+\}
+\]
+
+以及大规模 Jev preference：
+
+\[
+D_J
+=
+\{
+(\sigma_j^A,\sigma_j^B,p_j^J,c_j^J)
+\}
+\]
+
+其中：
+
+- \(p_j^J\)：Jev preference distribution；
+- \(c_j^J\)：Jev raw confidence。
+
+需要学习的不是 Jev 的 raw confidence 本身，而是它和 human preference 的一致概率：
+
+\[
+\rho_j
+=
+P(
+y_j^J=y_j^H
+\mid
+x_j,p_j^J,c_j^J
+)
+\]
+
+因此 human preference 的作用是：
+
+1. objective anchor；
+2. calibration set；
+3. low-confidence / high-risk escalation source；
+4. final policy evaluation。
+
+一个直接的 reward-model loss 可以写成：
+
+\[
+\mathcal L_{RM}
+=
+\sum_{i\in D_H}
+CE(P_\psi,y_i^H)
++
+\alpha
+\sum_{j\in D_J}
+\rho_j
+CE(P_\psi,y_j^J)
+\]
+
+这使得本方法继承 Christiano-style pairwise preference learning，但将高频 human annotation 替换成 calibrated AI feedback。
+
+
 ## 2. Trust Weight
 
 定义：
