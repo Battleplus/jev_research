@@ -1,9 +1,9 @@
-# Jev-Assisted Reinforcement Learning Research
+# Human-Calibrated AI Preference Reinforcement Learning
 
-本仓库用于整理 **Jev / calibrated semantic evaluator 辅助强化学习训练** 方向的调研、研究构想、实验方案与阶段性结论。
+本仓库用于整理 **Human Preference + AI/Jev Preference + Reliability Calibration + Preference-Based RL** 方向的调研、研究构想、实验方案与阶段性结论。Jev 当前被视为一个可替换的 fast probabilistic evaluator backend，而不是论文贡献本身。
 
 > 当前核心判断：  
-> **“Jev → reward → PPO/SAC”本身已经不足以作为主要创新点。更有研究价值的方向是：把外部语义评价器视为带噪反馈源，通过 calibration / uncertainty-aware trust allocation 动态控制其对 RL policy update 的影响。**
+> **“Jev → reward/preference → RL → standalone policy”这一大框架已经有明确先例；当前真正值得验证的是：用少量 Human Preference 估计 AI/Jev 与 Human objective 的 sample-wise agreement probability，并让该 Human-Aligned Reliability 控制 AI preference weighting、Human escalation 与 downstream policy learning。**
 
 ## 研究问题
 
@@ -40,15 +40,19 @@ w_t = f(c_t, \mathrm{OOD}_t, \mathrm{disagreement}_t)
 
 ## 当前推荐名称
 
-**Calibrated Semantic Feedback Reinforcement Learning (CSF-RL)**
+**Human-Calibrated AI Preference Reinforcement Learning**
 
-Jev 在这里作为一个 fast semantic evaluator / teacher，而不是论文方法本身。
+更完整的论文表述：
 
-如果把课题进一步收缩到 preference learning，当前更清晰的定位是：
-
-> **Human-Anchored Calibrated AI Feedback for Preference-Based Reinforcement Learning**
+> **Human-Anchored Reliability Calibration for AI-Assisted Preference-Based Reinforcement Learning**
 >
-> 用少量 human preference 作为目标锚点，对 Jev 等 AI evaluator 的 preference/confidence 做 calibration，再根据 sample-wise reliability 决定 AI feedback 对 reward learning 和 policy update 的影响。
+> 用少量 Human Preference 作为目标锚点，不直接相信 AI/Jev 的 raw confidence，而是学习：
+>
+> \[
+> \rho_i=P(y_i^{AI}=y_i^{Human}\mid x_i,c_i^{AI})
+> \]
+>
+> 再根据 \(\rho_i\) 决定 AI preference 的训练权重、是否升级到 Human/Strong Judge，以及其对 downstream policy learning 的影响。
 
 ## 当前结论
 
@@ -59,12 +63,10 @@ Jev 在这里作为一个 fast semantic evaluator / teacher，而不是论文方
    - 如何处理 OOD、reward hacking、paraphrase instability；
    - 如何根据 uncertainty 决定是否升级到 strong judge；
    - 如何在 robot RL 中验证最终 policy quality，而不仅仅是 evaluator accuracy。
-4. Jev 是闭源模型，不需要训练 Jev 本身。建议：
-   - Jev 冻结做 teacher / evaluator；
-   - PPO / SAC policy 正常训练；
-   - 可选训练本地 surrogate reward model；
-   - 高频 inner-loop 优先使用本地 evaluator；
-   - 低置信样本再调用 Jev / strong judge。
+4. **训练期 AI teacher、部署期 standalone policy 已经有大量先例**，包括 RL-VLM-F、LAPP、Preference VLM 等，因此这不能作为 novelty。
+5. **Hybrid Human+AI preference、uncertain sample→Human、confidence weighting 也已有近邻工作**，包括 Preference VLM、ROVED、Hybrid Preferences、CW-PO、BACON、Conformal Feedback Alignment 等。
+6. 当前最值得争取的 novelty 是：**Human-Aligned sample-wise reliability**，而不是 raw AI confidence。
+7. Jev 是闭源模型，不需要训练 Jev 本身，也不应成为算法不可替代组件；部署阶段最终 policy 应独立运行，不再调用 Jev。
 
 ## 仓库结构
 
@@ -75,14 +77,19 @@ Jev 在这里作为一个 fast semantic evaluator / teacher，而不是论文方
 - [docs/05_References.md](docs/05_References.md)：核心参考文献
 - [docs/06_Reading_Plan.md](docs/06_Reading_Plan.md)：文献精读顺序
 - [docs/07_Human_Preference_RL_Lineage.md](docs/07_Human_Preference_RL_Lineage.md)：与人类偏好强化学习 / RLHF 的关系与最终定位
-- [experiments/00_POC_Plan.md](experiments/00_POC_Plan.md)：两周 proof-of-concept 计划
+- [docs/08_Current_Progress_2026-09-22.md](docs/08_Current_Progress_2026-09-22.md)：当前进度、novelty 边界、难度与风险
+- [docs/09_Closest_Prior_Work_Map.md](docs/09_Closest_Prior_Work_Map.md)：最接近 prior work 与模块级撞题地图
+- [experiments/00_POC_Plan.md](experiments/00_POC_Plan.md)：第一版两周 proof-of-concept 计划
+- [experiments/01_Human_Calibrated_Jev_POC_v2.md](experiments/01_Human_Calibrated_Jev_POC_v2.md)：当前推荐的 Human-Calibrated Jev PoC v2
 
 ## 当前建议的目标
 
-第一阶段先做 **MetaWorld / structured-state proof-of-concept**，验证：
+第一阶段先做 **MetaWorld / structured-state proof-of-concept**，只回答三个问题：
 
-> Jev semantic feedback 是否真的提供了可用于 RL 的有效 learning signal？
+1. Jev raw confidence 是否能够预测 Jev–Human preference agreement？
+2. 少量 Human Preference 能否把 Jev confidence 校准成更可靠的 Human-Aligned Reliability？
+3. 更好的 reliability estimation 是否最终改善 Reward Model 和 RL policy，而不只是改善 ECE/Brier？
 
-如果成立，再加入 calibration、uncertainty-aware weighting、reward hacking / OOD 测试，最后进入 ManiSkill / LIBERO / 真机。
+如果这三条成立，再进入 selective escalation、distribution shift、OOD、reward hacking、ManiSkill/LIBERO 和真机。
 
 更新时间：2026-09-22
