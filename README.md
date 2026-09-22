@@ -40,7 +40,7 @@ w_t = f(c_t, \mathrm{OOD}_t, \mathrm{disagreement}_t)
 
 ## 当前推荐名称
 
-**Human-Calibrated AI Preference Reinforcement Learning**
+**Human-Anchored Contextual Reliability for AI-Assisted Preference-Based Reinforcement Learning**
 
 更完整的论文表述：
 
@@ -79,6 +79,7 @@ w_t = f(c_t, \mathrm{OOD}_t, \mathrm{disagreement}_t)
 - [docs/07_Human_Preference_RL_Lineage.md](docs/07_Human_Preference_RL_Lineage.md)：与人类偏好强化学习 / RLHF 的关系与最终定位
 - [docs/08_Current_Progress_2026-09-22.md](docs/08_Current_Progress_2026-09-22.md)：当前进度、novelty 边界、难度与风险
 - [docs/09_Closest_Prior_Work_Map.md](docs/09_Closest_Prior_Work_Map.md)：最接近 prior work 与模块级撞题地图
+- [docs/10_2026_Closest_Work_Verification.md](docs/10_2026_Closest_Work_Verification.md)：配额恢复后对 2026 最危险近邻工作的全文核验
 - [experiments/00_POC_Plan.md](experiments/00_POC_Plan.md)：第一版两周 proof-of-concept 计划
 - [experiments/01_Human_Calibrated_Jev_POC_v2.md](experiments/01_Human_Calibrated_Jev_POC_v2.md)：当前推荐的 Human-Calibrated Jev PoC v2
 
