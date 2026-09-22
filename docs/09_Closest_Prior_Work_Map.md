@@ -146,7 +146,7 @@ policy.
 
 ---
 
-## 5. 最新高相关 2026 论文（待全文核验）
+## 5. 最新高相关 2026 论文（已完成全文核验）
 
 本轮 Undermind 搜索新出现：
 
@@ -234,3 +234,70 @@ policy.
 Jev 更适合作为：
 
 > one evaluator backend / case study.
+
+
+---
+
+## 8. 70 篇 Deep Search 完成后的最终边界
+
+最新专项 Deep Search：
+
+> **Sample wise human calibrated AI preference reliability in PBRL**
+
+共返回 70 篇高相关工作。
+
+最终结果未发现完整覆盖以下链路的论文：
+
+\[
+Human\ Anchor
+\rightarrow
+Contextual\ AI\text{-}Human\ Agreement
+\rightarrow
+Sample\text{-}wise\ Reliability
+\rightarrow
+Preference\ Weighting / Escalation
+\rightarrow
+Reward\ Model
+\rightarrow
+Preference\ RL
+\rightarrow
+Standalone\ Policy
+\]
+
+最接近工作包括：
+
+- Trust or Escalate：Human agreement calibration + escalation，但无 downstream RL；
+- Judging with Confidence：sample-wise Human preference distribution calibration，但无 RL；
+- BACON：small Human + AI judge + context + sample-wise prediction，但用于 evaluation；
+- Hybrid Preferences：Human/AI routing，但不显式建模 \(P(AI=Human|x)\)；
+- Preference VLM / ROVED：Robot/PbRL + uncertain feedback + Human/Oracle，但不是 Human-anchored AI agreement calibration；
+- TriTrust-PBRL：trust-aware PbRL，但以 source-wise trust 为主；
+- Feature-Dependent Noise in PbRL：sample/context-dependent noise + downstream RL，但主要基于 oracle/synthetic noise。
+
+因此最 defensible 的方法主线是：
+
+\[
+\boxed{
+\rho_i
+=
+P(
+y_i^{AI}=y_i^{Human}
+\mid
+trajectory_i,\ confidence_i,\ difficulty_i,\ OOD_i,\ policy\ stage_i
+)
+}
+\]
+
+并研究：
+
+\[
+\rho_i
+\rightarrow
+Preference\ Weighting
++
+Human\ Escalation
++
+Policy\text{-}Shift\ Recalibration.
+\]
+
+建议把 **policy-induced AI feedback reliability shift** 提升为核心实验问题。
