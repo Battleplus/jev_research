@@ -32,7 +32,102 @@ r_t = r_t^{env} + \lambda r_t^{Jev}
 
 Jev 是重要 evaluator，但方法不绑定 Jev。
 
-## 二、目前相关方向做到什么程度
+
+## 二、和“人类偏好强化学习”的关系
+
+这次进一步看了三篇核心文献：
+
+1. **Christiano et al., Deep Reinforcement Learning from Human Preferences**
+2. **Kaufmann et al., A Survey of Reinforcement Learning from Human Feedback**
+3. **Zhong et al., A Comprehensive Survey of Reward Models**
+
+现在我认为，这个课题如果要和 Preference RL / RLHF 真正接上，最合理的逻辑不是“Jev 直接给 reward”，而是：
+
+\`\`\`text
+Christiano:
+Human Preference → Reward Model → RL Policy
+
+RLAIF:
+AI Preference → Reward Model → RL Policy
+
+我们的设想:
+Human Preference (少量 anchor)
+            ↓
+      calibrate / validate
+            ↓
+Jev Preference + Confidence
+            ↓
+sample-wise reliability
+            ↓
+Reward Model / Policy Update
+            ↓
+PPO / SAC
+\`\`\`
+
+Christiano 的核心是让人比较两段 trajectory 哪个更好，而不是要求人写出数值 reward。Reward predictor 从 pairwise preference 中学习潜在 reward，policy 再优化这个 reward。
+
+Kaufmann 的 survey 把现代 RLHF 看成 PbRL 的广义扩展：pairwise trajectory comparison 属于最典型的 PbRL，同时也是 RLHF 的经典形式。也就是说，Christiano-style pipeline 本质上是“preference collection → reward learning → policy learning”。
+
+Zhong 的 Reward Model survey 又把 preference collection 分成 **Human Preference** 和 **AI Preference**。因此，若 Jev 负责比较 trajectory pair，它首先属于 **AI preference source / RLAIF lineage**；若 Jev 直接给 scalar reward，则更接近 generative reward model / Direct-RLAIF。
+
+所以：
+
+> **单纯把 Human 换成 Jev，并不是新的研究问题。**
+
+我现在更想研究的是：
+
+> **Human 和 AI feedback 之间的信任分配。**
+
+具体是保留少量 human preference 作为目标锚点，用它来估计：
+
+\[
+\rho_i
+=
+P(
+y_i^{Jev}=y_i^{Human}
+\mid
+x_i,c_i^{Jev}
+)
+\]
+
+然后：
+
+- 高 \(\rho_i\)：正常使用 Jev preference；
+- 中等 \(\rho_i\)：低权重使用；
+- 低 \(\rho_i\)：升级给 human / stronger judge。
+
+如果训练 local reward model：
+
+\[
+\mathcal L_{RM}
+=
+\sum_{i\in D_H} CE(P_\psi,y_i^H)
++
+\alpha
+\sum_{j\in D_J}
+\rho_j CE(P_\psi,y_j^J)
+\]
+
+这里 human label 是 anchor，Jev label 的权重由它与 human objective 的一致概率决定。
+
+这样本课题和“人类偏好强化学习”的联系就不再是口头上的，而是直接进入算法结构。
+
+### 这个定位的好处
+
+1. 保留 Christiano-style preference RL 的基本逻辑；
+2. 比“Jev 直接给 reward”更容易和 RLAIF / RL-VLM-F 做清晰对比；
+3. Jev 闭源影响变小，因为它主要做 labeler，而不是 RL 内循环模型；
+4. 可以把 **human query efficiency** 作为一个明确贡献；
+5. calibration 的目标也更清楚：不是校准 Jev 自己的 confidence，而是校准 **Jev 与 human preference 一致的概率**。
+
+因此目前更具体的题目可以考虑：
+
+> **Human-Anchored Calibrated AI Feedback for Preference-Based Reinforcement Learning**
+
+详细推导见 [07_Human_Preference_RL_Lineage.md](07_Human_Preference_RL_Lineage.md)。
+
+
+## 三、目前相关方向做到什么程度
 
 目前比较接近的路线包括：
 
@@ -52,7 +147,7 @@ Jev 是重要 evaluator，但方法不绑定 Jev。
 
 > **“LLM/VLM/Judge 给 RL reward”已经不是空白。**
 
-## 三、目前认为还有价值的创新点
+## 四、目前认为还有价值的创新点
 
 ### Calibrated Trust Allocation
 
@@ -105,7 +200,7 @@ A_t^{env}
 
 > calibration 是否真的能够改善最终 RL policy，而不只是提升 evaluator accuracy。
 
-## 四、Jev 的角色
+## 五、Jev 的角色
 
 \`\`\`text
 Environment
@@ -143,7 +238,7 @@ Jev 更适合做：
 
 而不是 RL policy 本身。
 
-## 五、Jev 不开源的问题
+## 六、Jev 不开源的问题
 
 Jev 是闭源 API，因此不能下载权重进行 end-to-end fine-tuning。
 
@@ -172,7 +267,7 @@ f_\phi(\tau)
 
 需要提前确认 TypeSafe 服务条款是否允许使用 API 输出训练 surrogate model。
 
-## 六、主要实验问题
+## 七、主要实验问题
 
 最终必须证明的不是：
 
@@ -209,7 +304,7 @@ f_\phi(\tau)
 - Reward Hacking
 - API Calls / Cost / Latency
 
-## 七、第一阶段建议
+## 八、第一阶段建议
 
 先不碰 RGB / VLM perception。
 
@@ -242,13 +337,13 @@ trust weighting
 
 然后再进入 ManiSkill / LIBERO / 真机。
 
-## 八、难度判断
+## 九、难度判断
 
 - 简单 Jev + PPO：约 5/10
 - calibration + uncertainty + OOD + reward hacking：约 7.5–8/10
 - 多机器人任务 + 真机 + 理论：约 9/10
 
-## 九、希望学长重点帮忙判断
+## 十、希望学长重点帮忙判断
 
 1. calibrated semantic feedback + RL 的创新量是否够？
 2. 更适合做 general RL、robot RL 还是 Safe RL？
