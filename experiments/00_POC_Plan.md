@@ -113,6 +113,48 @@ Current state:
 
 ---
 
+
+## Day 4B：Human Preference Anchor（建议加入）
+
+如果目标论文要明确与 PbRL / RLHF 建立联系，第一阶段最好额外收集一小批真实 human pairwise preferences。
+
+对同一批 trajectory pairs：
+
+\[
+(\sigma^A,\sigma^B)
+\]
+
+同时获得：
+
+\[
+y_H,\quad y_J,\quad c_J
+\]
+
+其中：
+
+- \(y_H\)：human preference；
+- \(y_J\)：Jev preference；
+- \(c_J\)：Jev confidence。
+
+第一阶段不需要大量人类标注，重点是验证：
+
+\[
+c_J
+\stackrel{?}{\longrightarrow}
+P(y_J=y_H)
+\]
+
+至少报告：
+
+- Human–Jev agreement
+- Jev confidence vs agreement
+- ECE / Brier
+- disagreement by task difficulty
+- low-confidence sample examples
+
+如果两周内暂时不方便做人类标注，可以先用 simulator oracle 验证工程链路；但最终若声称属于 human-preference / RLHF 方向，需要补真实 human preference anchor。
+
+
 ## Day 5：Paraphrase Test
 
 同一个 state pair 构造 3–5 个语义等价 task descriptions。
@@ -250,6 +292,9 @@ r_t^{env}
 4. Fixed-weight Jev
 5. Hard-gated Jev
 6. Calibrated-weight Jev
+7. Human-only preference RM（小规模 anchor baseline）
+8. Human + Jev naïve pooling
+9. Human-anchored calibrated Jev
 
 指标：
 
@@ -301,9 +346,10 @@ r_t^{env}
 
 1. 一张 Jev calibration 图
 2. 一张 RL learning curve
-3. 一张 6-method comparison table
-4. 一张 noise robustness 曲线
-5. 一页 Go / No-Go 结论
+3. 一张 human/Jev agreement + calibration 图
+4. 一张 Human-only / Jev-only / naïve hybrid / calibrated hybrid comparison table
+5. 一张 noise robustness 曲线
+6. 一页 Go / No-Go 结论
 
 ---
 
