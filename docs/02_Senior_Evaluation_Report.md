@@ -355,3 +355,99 @@ trust weighting
 目前个人更倾向于：
 
 > **Calibrated Semantic Feedback Reinforcement Learning：将 Jev 等外部 evaluator 的输出视为带噪反馈，通过 calibration 与 uncertainty-aware trust allocation 动态控制其对 PPO/SAC policy update 的影响，并重点研究 OOD、reward hacking 与机器人任务下的鲁棒性。**
+
+
+---
+
+## 十一、2026-09-22 最新调研后的方向修正
+
+继续使用 Undermind 对“AI evaluator 只在训练期当老师、最终 policy 独立部署”“少量 Human + 大量 AI Preference”“Human 校准 AI reliability”进行了更窄的检索后，当前结论进一步收缩。
+
+### 已经明确有人做的部分
+
+以下内容不能再作为主要创新：
+
+1. **AI evaluator 只在训练阶段提供 preference/reward，最终 policy 独立部署**
+   - RL-VLM-F
+   - RLAIF / Direct-RLAIF
+   - LAPP
+   - Preference VLM
+
+2. **AI Preference 替代 Human Preference**
+   - RLAIF 已经系统建立该路线。
+
+3. **少量 Human + 大量 AI Preference**
+   - Preference VLM、ROVED、Hybrid Preferences 等已开始使用 hybrid feedback。
+
+4. **uncertain AI sample → Human**
+   - Preference VLM / ROVED 已经非常接近。
+
+5. **raw confidence / uncertainty → loss weight**
+   - Confidence-Weighted Preference Optimization、Conformal Feedback Alignment、UARM 等已有明确先例。
+
+### 当前最值得继续验证的核心
+
+不是：
+
+\[
+c_i^{Jev}
+\]
+
+而是：
+
+\[
+\rho_i
+=
+P(
+y_i^{Jev}=y_i^{Human}
+\mid
+x_i,c_i^{Jev}
+)
+\]
+
+即：
+
+> **Jev 自己有多自信，不等于它有多符合 Human Preference。**
+
+因此现在最推荐的主线是：
+
+> **用少量 Human Preference 把 AI/Jev 的自信度转换成 Human-Aligned sample-wise reliability，再让该 reliability 联合控制 AI preference weighting、Human escalation 和 downstream RL。**
+
+当前建议题目：
+
+> **Human-Calibrated AI Preference Reinforcement Learning**
+
+详细最新状态见：
+
+- [08_Current_Progress_2026-09-22.md](08_Current_Progress_2026-09-22.md)
+- [09_Closest_Prior_Work_Map.md](09_Closest_Prior_Work_Map.md)
+- [../experiments/01_Human_Calibrated_Jev_POC_v2.md](../experiments/01_Human_Calibrated_Jev_POC_v2.md)
+
+### 最新撞题风险
+
+2026 年已经出现多个高度相关主题：
+
+- Preference-Calibrated Human-in-the-Loop RL for Robotic Manipulation
+- TrustRoboReward
+- Joint Reward / Worker Reliability Learning
+- Multi-Expert Preference Reliability
+
+这些是下一轮必须优先全文核验的工作。
+
+因此当前不是“完全空白的新领域”，而是：
+
+> **2025–2026 正快速从“AI 能否给 feedback”转向“AI feedback 什么时候值得相信”的新窗口。**
+
+实现上第一版 PoC 可控，但论文级难度主要来自：
+
+\[
+Calibration
+\rightarrow
+Better\ Preference
+\rightarrow
+Better\ Reward\ Model
+\rightarrow
+Better\ Policy
+\]
+
+这条因果链是否能在实验中真正成立。
