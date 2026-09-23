@@ -308,6 +308,7 @@ P(AI=Human\mid d^{\pi_T})
 - [docs/13_Final_Research_Execution_Plan.md](docs/13_Final_Research_Execution_Plan.md)：当前正式执行版规划，包含 Phase 0–9、时间表、资源、baseline、ablation、Go/No-Go 与下一步任务
 - [docs/14_Publication_Timeline_Roadmap.md](docs/14_Publication_Timeline_Roadmap.md)：投稿与时间路线图，包含4周Go/No-Go、12–16周完整稿、RA-L/Q1默认目标及CoRL/RSS、T-RO/IJRR升级条件
 - [docs/15_Jev_Article_Research_Implications.md](docs/15_Jev_Article_Research_Implications.md)：结合 Jev 最新科普与产品信息，对 probability vector、consistency test、oracle leakage、Go/No-Go 和投稿边界的补充分析
+- [docs/16_Undermind_Latest_Prior_Work_Verification.md](docs/16_Undermind_Latest_Prior_Work_Verification.md)：最新 Undermind 查新、31 篇全文证据表、agreement shift 先例、Weak-Go 判断与 Phase 1 修订建议
 - [experiments/00_POC_Plan.md](experiments/00_POC_Plan.md)：第一版两周 proof-of-concept 计划
 - [experiments/01_Human_Calibrated_Jev_POC_v2.md](experiments/01_Human_Calibrated_Jev_POC_v2.md)：当前推荐的 Human-Calibrated Jev PoC v2
 
