@@ -1,8 +1,8 @@
-# Human-Anchored Contextual Reliability for AI-Assisted Preference-Based Reinforcement Learning
+# Human-Aligned Adaptation of Frozen AI Feedback for Preference-Based Reinforcement Learning
 
-> **一句话：不是研究“怎么让 Jev 给 RL 打分”，而是研究“AI 给出的 preference 到底什么时候值得相信”。**
+> **一句话：不是研究“怎么后训练 Jev/ChatGPT”，而是研究“面对一个不可修改的 frozen black-box AI teacher，如何用少量 Human Preference 修正、校准并可靠利用它的 feedback 来训练 RL”。**
 
-本仓库用于整理 **Human Preference + AI/Jev Preference + Reliability Calibration + Preference-Based RL** 方向的调研、研究构想、实验方案与阶段性结论。Jev 当前被视为一个可替换的 fast probabilistic evaluator backend，而不是论文贡献本身。
+本仓库用于整理 **Frozen Black-box AI Teacher + Human-Aligned Feedback Adaptation + Preference-Based RL** 方向的调研、研究构想、实验方案与阶段性结论。Jev / GPT / VLM 当前都被视为可替换的 frozen evaluator backend，而不是论文贡献本身。
 
 当前完整研究链路：
 
@@ -70,7 +70,11 @@ w_t = f(c_t, \mathrm{OOD}_t, \mathrm{disagreement}_t)
 
 ## 当前推荐名称
 
-**Human-Anchored Contextual Reliability for AI-Assisted Preference-Based Reinforcement Learning**
+**Human-Aligned Adaptation of Frozen AI Feedback for Preference-Based Reinforcement Learning**
+
+更聚焦的方法名：
+
+**Policy-Conditional Human-Aligned Feedback Correction for Frozen AI Teachers**
 
 更完整的论文表述：
 
@@ -171,6 +175,106 @@ P(AI=Humanmid d^{pi_T})
 
 也就是说，训练早期校准好的 evaluator 到训练后期可能失准。后续比较 **Static Calibration** 与 **Online Human Recalibration**，观察 ECE/Brier 与最终 Policy Success 是否随 policy shift 发生系统变化。
 
+## 2026-09-23 V2 路线修正：Frozen Black-box Teacher
+
+新的关键约束：
+
+> **如果 Jev / ChatGPT / 其他闭源 evaluator 没有官方 fine-tuning/post-training 接口，我们不能直接更新其模型参数。**
+
+这不是方案漏洞，而是研究设定：
+
+\[
+\boxed{\theta_{AI}\ \text{fixed}}
+\]
+
+当前不再研究：
+
+\[
+Human\ Feedback
+\rightarrow
+Post\text{-}train\ Jev/GPT
+\]
+
+而是研究：
+
+\[
+\boxed{
+Frozen\ AI\ Teacher
+\rightarrow
+Human\text{-}Aligned\ Feedback\ Adapter
+\rightarrow
+Preference\ RL
+}
+\]
+
+建议的外部可训练模块：
+
+\[
+F_\phi(
+\tau_A,\tau_B,
+y_{AI},c_{AI},
+difficulty,OOD,policy\ stage
+)
+\rightarrow
+(\hat y_H,\rho)
+\]
+
+其中：
+
+- \(\hat y_H\)：预测 Human 更可能选择的 preference；
+- \(\rho=P(y_{AI}=y_H\mid context,\pi_t)\)：AI 与 Human 在当前样本上的 agreement reliability。
+
+也就是说，方法从单纯 **Reliability Calibration** 升级为：
+
+\[
+\boxed{Human\text{-}Aligned\ Feedback\ Adaptation}
+\]
+
+专项 Undermind Deep Search 共返回 **236 篇相关工作**。全文核验后确认：
+
+- Frozen foundation model → preference/reward → RL 已有充分先例；
+- small Human + AI routing 已有先例；
+- sample-wise filtering/correction 已有先例；
+- black-box AI + external human correction mapping 已有先例；
+- frozen VLM + prompt optimization 已有先例；
+- policy-aware reward learning 已有先例。
+
+因此当前最值得守住的 novelty 不是任一单模块，而是：
+
+\[
+\boxed{
+Human\text{-}Anchored
++
+Frozen\ Black\text{-}box\ AI
++
+Sample/Context\text{-}wise\ Correction
++
+Policy\text{-}Conditional\ Reliability
++
+Online\ Recalibration
++
+Downstream\ Robot\ PbRL
+}
+\]
+
+新的核心实验假设：
+
+\[
+\boxed{
+P(AI=Human\mid d^{\pi_0})
+\neq
+P(AI=Human\mid d^{\pi_T})
+}
+\]
+
+即：**同一个 frozen AI teacher 的 Human agreement 可能随着 policy-induced trajectory distribution shift 系统变化。**
+
+详见：
+
+[docs/12_Frozen_Black_Box_Teacher_V2.md](docs/12_Frozen_Black_Box_Teacher_V2.md)
+
+---
+
 ## 当前结论
 
 1. **AI / LLM / VLM feedback → RL 已经有大量先例**，因此不能把“使用 Jev 给 reward”作为主要 novelty。
@@ -200,6 +304,7 @@ P(AI=Humanmid d^{pi_T})
 - [docs/09_Closest_Prior_Work_Map.md](docs/09_Closest_Prior_Work_Map.md)：最接近 prior work 与模块级撞题地图
 - [docs/10_2026_Closest_Work_Verification.md](docs/10_2026_Closest_Work_Verification.md)：配额恢复后对 2026 最危险近邻工作的全文核验
 - [docs/11_Final_Deep_Search_Result.md](docs/11_Final_Deep_Search_Result.md)：70 篇 Deep Search 最终结论、novelty 边界与当前定稿研究问题
+- [docs/12_Frozen_Black_Box_Teacher_V2.md](docs/12_Frozen_Black_Box_Teacher_V2.md)：236 篇专项检索 + 全文核验后的 V2 路线，解释闭源模型为何不需要后训练、外部 feedback adapter 应如何设计
 - [experiments/00_POC_Plan.md](experiments/00_POC_Plan.md)：第一版两周 proof-of-concept 计划
 - [experiments/01_Human_Calibrated_Jev_POC_v2.md](experiments/01_Human_Calibrated_Jev_POC_v2.md)：当前推荐的 Human-Calibrated Jev PoC v2
 
@@ -254,4 +359,4 @@ Standalone Policy
 
 如果这三条成立，再进入 selective escalation、distribution shift、OOD、reward hacking、ManiSkill/LIBERO 和真机。
 
-更新时间：2026-09-22
+更新时间：2026-09-23
