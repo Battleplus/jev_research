@@ -301,3 +301,205 @@ Policy\text{-}Shift\ Recalibration.
 \]
 
 建议把 **policy-induced AI feedback reliability shift** 提升为核心实验问题。
+
+
+---
+
+## 9. 2026-09-23：Frozen Black-box Teacher 专项核验更新
+
+基于新的 Undermind 专项 Deep Search（236 篇相关工作）以及重点全文核验，当前 prior-work 地图需要新增以下几类危险近邻。
+
+### 9.1 Aligning Black-box Language Models with Human Judgments
+
+该工作已经做到：
+
+\[
+Black\text{-}box\ LLM\ judgment
++
+small\ Human\ calibration
+\rightarrow
+external\ correction\ mapping
+\]
+
+关键特点：
+
+- 黑盒 LLM 完全冻结；
+- 无需访问模型权重或 logits；
+- 使用少量 Human labels 学习外部线性映射；
+- 输出修正后的 human-aligned categorical judgment；
+- 主要是静态 evaluation；
+- 无 downstream RL；
+- 无 on-policy / policy-stage adaptation。
+
+因此：
+
+> **“闭源 AI + 少量 Human + 外部 correction layer”本身不能作为 novelty。**
+
+我们的差异必须落在：
+
+\[
+trajectory/context/sample\text{-}wise
++
+policy\text{-}conditional
++
+online\ recalibration
++
+downstream\ PbRL
+\]
+
+---
+
+### 9.2 Demo2Reward / Test-Time Prompt Optimization
+
+该工作已经做到：
+
+\[
+Frozen\ VLM
++
+few\ expert\ demonstrations
+\rightarrow
+prompt\ optimization
+\rightarrow
+robot\ reward
+\rightarrow
+RL
+\]
+
+并通过优化 prompt 减少 false positive / reward hacking。
+
+因此：
+
+> **“不修改 foundation model 权重，而优化 teacher 的使用方式”也已有明确先例。**
+
+与当前方案的区别：
+
+- Demo2Reward 是 task-level prompt optimization；
+- 当前方案关注 sample-wise Human Preference correction / reliability；
+- Demo2Reward 在 policy learning 前完成 prompt 优化；
+- 当前方案考虑 policy-induced agreement shift 与 online recalibration。
+
+---
+
+### 9.3 VARP
+
+VARP 使用 frozen GPT-4o/VLM preference，并通过 agent-aware regularization 让 reward learning 与 current policy 的行为分布保持联系。
+
+因此：
+
+> **“policy evolves / distribution shift”本身不能作为笼统 novelty。**
+
+当前更精确的研究问题应是：
+
+\[
+\boxed{
+P(y^{AI}=y^{Human}\mid d^{\pi_t})
+}
+\]
+
+是否随 policy stage 改变。
+
+也就是研究：
+
+> **AI–Human agreement shift，而不是仅仅 reward-model distribution shift。**
+
+---
+
+### 9.4 LAPP
+
+LAPP 已经实现：
+
+\[
+Frozen\ GPT\text{-}4o\text{-}mini
+\rightarrow
+structured\ robot\ trajectory\ preference
+\rightarrow
+local\ preference\ predictor
+\rightarrow
+PPO
+\rightarrow
+standalone\ robot\ policy
+\]
+
+因此：
+
+> **closed LLM → local model → robot RL → standalone deployment 已经成立。**
+
+Jev 的“闭源”属性不能被当作方法困难或 novelty 本身。
+
+---
+
+### 9.5 Preference VLM / ROVED 的新核验
+
+全文核验确认二者比摘要层面更接近当前方案：
+
+- sample-wise clean / noisy / uncertain 划分；
+- RM↔VLM KL divergence 作为异常判断；
+- uncertain → Human/Oracle；
+- noisy → label flipping；
+- Human/Oracle feedback 还会训练 VLM/VLE 上的 adapter；
+- 对 policy/state distribution shift 也有专门处理。
+
+因此不能声称：
+
+- 首次 sample-wise correction；
+- 首次 Human routing；
+- 首次处理 policy-induced distribution shift；
+- 首次用 adapter 适应 AI feedback。
+
+当前仍可争取的区别是：
+
+\[
+\boxed{
+P(AI\ preference=Human\ preference
+\mid
+trajectory,context,policy\ stage)
+}
+\]
+
+作为显式 human-anchored target，并将其用于 correction + weighting + escalation + downstream PbRL。
+
+---
+
+## 10. 更新后的最安全 novelty 边界
+
+当前最安全的表述不再只是：
+
+> Human-Anchored Contextual Reliability
+
+而建议升级为：
+
+> **Policy-Conditional Human-Aligned Feedback Correction for Frozen AI Teachers in Preference-Based Reinforcement Learning**
+
+核心组合：
+
+\[
+\boxed{
+Human\text{-}Anchored
++
+Frozen\ Black\text{-}box\ AI
++
+Sample/Context\text{-}wise\ Correction
++
+Policy\text{-}Conditional\ Reliability
++
+Online\ Recalibration
++
+Downstream\ Robot\ PbRL
+}
+\]
+
+其中：
+
+- Frozen AI 不是 novelty；
+- correction 不是 novelty；
+- calibration 不是 novelty；
+- routing 不是 novelty；
+- policy-aware reward learning 不是 novelty；
+
+真正有机会的是：
+
+> **把 Human-defined sample-wise AI correctness / correction target 与 evolving on-policy trajectory distribution 明确耦合，并证明它能改善 downstream reward learning 与 robot policy。**
+
+详细路线见：
+
+- `docs/12_Frozen_Black_Box_Teacher_V2.md`
