@@ -306,6 +306,7 @@ P(AI=Human\mid d^{\pi_T})
 - [docs/11_Final_Deep_Search_Result.md](docs/11_Final_Deep_Search_Result.md)：70 篇 Deep Search 最终结论、novelty 边界与当前定稿研究问题
 - [docs/12_Frozen_Black_Box_Teacher_V2.md](docs/12_Frozen_Black_Box_Teacher_V2.md)：236 篇专项检索 + 全文核验后的 V2 路线，解释闭源模型为何不需要后训练、外部 feedback adapter 应如何设计
 - [docs/13_Final_Research_Execution_Plan.md](docs/13_Final_Research_Execution_Plan.md)：当前正式执行版规划，包含 Phase 0–9、时间表、资源、baseline、ablation、Go/No-Go 与下一步任务
+- [docs/14_Publication_Timeline_Roadmap.md](docs/14_Publication_Timeline_Roadmap.md)：投稿与时间路线图，包含4周Go/No-Go、12–16周完整稿、RA-L/Q1默认目标及CoRL/RSS、T-RO/IJRR升级条件
 - [experiments/00_POC_Plan.md](experiments/00_POC_Plan.md)：第一版两周 proof-of-concept 计划
 - [experiments/01_Human_Calibrated_Jev_POC_v2.md](experiments/01_Human_Calibrated_Jev_POC_v2.md)：当前推荐的 Human-Calibrated Jev PoC v2
 
